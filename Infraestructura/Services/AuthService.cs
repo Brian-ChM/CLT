@@ -31,6 +31,34 @@ public class AuthService : IAuthService
 
     }
 
+    public bool ValidateJwt(string token)
+    {
+        var privateKey = Encoding.UTF8.GetBytes(JwtConfig.Secret);
+
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+
+            var validParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(privateKey),
+            };
+
+            ClaimsPrincipal principal = handler.ValidateToken(token, validParameters, out SecurityToken validatedToken);
+            var usernameClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+            var roleClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public static ClaimsIdentity GenerateClaims(User user)
     {
         var claims = new ClaimsIdentity();
@@ -43,9 +71,4 @@ public class AuthService : IAuthService
 
         return claims;
     }
-
-    //public static string ValidateToken()
-    //{
-
-    //}
 }
