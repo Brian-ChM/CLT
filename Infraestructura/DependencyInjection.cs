@@ -29,7 +29,7 @@ public static class DependencyInjection
         services.AddValidation();
         services.AddMapping();
         services.AddServices();
-        services.AddAuth();
+        services.AddAuth(configuration);
 
         return services;
     }
@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IEntityRepository, EntityRepository>();
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAuthService, AuthService>();
 
         return services;
@@ -84,8 +85,11 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IServiceCollection AddAuth(this IServiceCollection services)
+    public static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
     {
+
+        configuration.GetSection("JWT").Get<JwtConfig>();
+
         services.AddAuthentication(x =>
         {
             x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -106,4 +110,35 @@ public static class DependencyInjection
 
         return services;
     }
+
+    //public static IServiceCollection AddSwaggerAuth(this IServiceCollection services)
+    //{
+    //    services.AddSwaggerGen(x =>
+    //    {
+    //        x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    //        {
+    //            Name = "Authorization",
+    //            In = ParameterLocation.Header,
+    //            Type = SecuritySchemeType.Http,
+    //            Scheme = "Bearer"
+    //        });
+
+    //        x.AddSecurityRequirement(new OpenApiSecurityRequirement
+    //        {
+    //            {
+    //                new OpenApiSecurityScheme
+    //                {
+    //                    Reference = new OpenApiReference
+    //                    {
+    //                        Type = ReferenceType.SecurityScheme,
+    //                        Id = "Bearer"
+    //                    }
+    //                },
+    //                Array.Empty<string>()
+    //            }
+    //        });
+    //    });
+
+    //    return services;
+    //}
 }

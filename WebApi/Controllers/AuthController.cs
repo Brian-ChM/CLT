@@ -19,7 +19,7 @@ public class AuthController : BaseApiController
     [HttpPost("validate-token")]
     public IActionResult ValidateToken([FromBody] string token)
     {
-        if (_authService.ValidateJwt(token))
+        if (!_authService.ValidateJwt(token))
             return BadRequest("Token no valido.");
 
         return Ok("Token valido.");
@@ -31,30 +31,21 @@ public class AuthController : BaseApiController
         return Ok(_authService.CreateToken(user));
     }
 
-    [Authorize(Roles = "admin")]
-    [HttpGet("Admin")]
-    public IActionResult Admin()
+    [Authorize(Roles = "user,admin")]
+    [HttpGet("User")]
+    public IActionResult AuthUser()
     {
         var user = HttpContext.User;
         var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value);
-        return Ok($"Claims de role {string.Join(' ', roles)}");
+        return Ok($"{string.Join(", ", roles)}");
     }
 
-    [Authorize(Roles = "seguridad")]
+    [Authorize(Roles = "seguridad,admin")]
     [HttpGet("Seguridad")]
-    public IActionResult Seguridad()
+    public IActionResult AuthSeguridad()
     {
         var user = HttpContext.User;
         var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value);
-        return Ok($"Claims de role {string.Join(' ', roles)}");
-    }
-
-    [Authorize(Roles = "admin,seguridad")]
-    [HttpGet("Todos")]
-    public IActionResult Todos()
-    {
-        var user = HttpContext.User;
-        var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value);
-        return Ok($"Claims de role {string.Join(' ', roles)}");
+        return Ok($"{string.Join(' ', roles)}");
     }
 }
